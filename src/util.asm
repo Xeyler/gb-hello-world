@@ -1,4 +1,6 @@
-INCLUDE "defines.asm"
+INCLUDE "hardware.inc"
+
+INCLUDE "util.inc"
 
 SECTION "Util", ROM0
 
@@ -6,7 +8,7 @@ SECTION "Util", ROM0
 ; @param b Number of bytes to write (0 writes 256 bytes)
 ; @param a Value to write
 ; So cute and smol. It can only write 256 bytes at most
-small_memset::
+small_memset:
 	ld	[hli], a
 	dec 	b
 	jr	nz, small_memset
@@ -15,9 +17,9 @@ small_memset::
 ; @param hl Destination pointer
 ; @param bc Number of bytes to write (0 writes 65536 bytes)
 ; @param a Value to write
-memset::
+memset:
 	ld	d, a
-.write_byte:
+.write_byte
 	ld	a, d
 	ld	[hli], a
 	dec	bc
@@ -30,7 +32,7 @@ memset::
 ; @param de Source pointer
 ; @param c Number of bytes to write (0 writes 256 bytes)
 ; Also cute and smol. It can only copy 256 bytes at most.
-small_memcpy::
+small_memcpy:
 	ld	a, [de]
 	inc	de
 	ld	[hli], a
@@ -38,7 +40,7 @@ small_memcpy::
 	jr	nz, small_memcpy
 	ret
 
-memcpy::
+memcpy:
 	ld	a, [de]
 	inc	de
 	ld	[hli], a

@@ -1,4 +1,4 @@
-INCLUDE "defines.asm"
+INCLUDE "hardware.inc"
 
 SECTION "header", ROM0[$100]
 
