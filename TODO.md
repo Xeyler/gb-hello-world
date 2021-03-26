@@ -1,2 +1,0 @@
-Reset vectors
-hUGETracker integration

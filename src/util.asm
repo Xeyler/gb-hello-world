@@ -2,7 +2,7 @@ INCLUDE "hardware.inc"
 
 INCLUDE "util.inc"
 
-SECTION "Util", ROM0
+SECTION "util functions", ROM0
 
 ; @param hl Destination pointer
 ; @param b Number of bytes to write (0 writes 256 bytes)

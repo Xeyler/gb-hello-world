@@ -2,7 +2,12 @@ INCLUDE "hardware.inc"
 
 INCLUDE "vblank.inc"
 
-SECTION UNION "shadow oam", WRAM0, ALIGN[8]
+SECTION "vblank handler", ROM0
+
+vblank_handler:
+	; TODO: Implement vblank handler
+
+SECTION "shadow oam", WRAM0, ALIGN[8]
 
 w_shadow_oam:
 	ds	40 * 4
