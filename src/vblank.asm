@@ -1,11 +1,40 @@
 INCLUDE "hardware.inc"
 
 INCLUDE "vblank.inc"
+INCLUDE "rand.inc"
 
 SECTION "vblank handler", ROM0
 
+; Loads 'a' register into vblank flag which determines what the handler will
+; do. See `vblank.inc` for the list of valid vblank flags. It is assumed that
+; when the handler has finished servicing the requested actions, it will escape
+; the halting loop by popping the return address off the stack.
+wait_for_vblank:
+	ld	a, 1
+	ldh	[h_vblank_enable], a
+.wait
+	halt
+	jr	.wait
+
 vblank_handler:
+	push	af
+
+	ldh	a, [h_vblank_enable]
+	and	a
+	jp	z, .lag_frame
+
 	; TODO: Implement vblank handler
+	call	rand
+.rand_wait
+	dec	a
+	inc	a
+	dec	a
+	jr	nz, .rand_wait
+
+	pop	af
+.lag_frame
+	pop	af
+	reti
 
 SECTION "shadow oam", WRAM0, ALIGN[8]
 
@@ -29,7 +58,8 @@ ENDL
 
 SECTION "vblank hram", HRAM
 
-h_vblank_ready_flag: db
+h_vblank_enable: db
+h_vblank_flag: db
 
 h_oam_high: db
 

@@ -2,6 +2,41 @@ INCLUDE "hardware.inc"
 
 INCLUDE "util.inc"
 
+SECTION "input", ROM0
+
+; Returns input in 'a' register
+; Bit 7 - Start
+; Bit 6 - Select
+; Bit 5 - B
+; Bit 4 - A
+; Bit 3 - Down
+; Bit 2 - Up
+; Bit 1 - Left
+; Bit 0 - Right
+; A value of 1 indicates a press
+get_input:
+	ld	hl, rP1
+	ld	a, P1F_GET_BTN
+	ld	[hl], a
+REPT 4
+	ld	a, [hl]
+ENDR
+
+	and	%00001111
+	swap	a
+	ld	b, a
+
+	ld	a, P1F_GET_DPAD
+	ld	[hl], a
+REPT 4
+	ld	a, [hl]
+ENDR
+
+	and	%00001111
+	or	b
+	cpl
+	ret
+
 SECTION "util functions", ROM0
 
 ; @param hl Destination pointer

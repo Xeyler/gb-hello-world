@@ -3,6 +3,8 @@ __VBLANK_INC SET 1
 
 INCLUDE	"util.inc"
 
+VBLANK_FLAG_NOP		equ %00000000
+
 copy_oam_dma_routine: MACRO
 	set_rom_bank BANK(oam_dma_source)
 	ld	de, oam_dma_source
@@ -11,11 +13,13 @@ copy_oam_dma_routine: MACRO
 	call	small_memcpy
 ENDM
 
+EXPORT	wait_for_vblank
 EXPORT	vblank_handler
 
 EXPORT	oam_dma_source
 EXPORT	w_shadow_oam
 
+EXPORT	h_vblank_flag
 EXPORT	h_oam_dma
 EXPORT	h_oam_dma.end
 EXPORT	h_oam_high

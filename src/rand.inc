@@ -1,0 +1,6 @@
+IF !DEF(__RAND_INC)
+__RAND_INC SET 1
+
+EXPORT rand
+
+ENDC	; __RAND_INC

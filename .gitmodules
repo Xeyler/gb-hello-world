@@ -1,3 +1,6 @@
 [submodule "src/include/hardware.inc"]
 	path = src/include/hardware.inc.d
 	url = https://github.com/gbdev/hardware.inc.git
+[submodule "src/include/hUGEDriver"]
+	path = src/res/music/hUGEDriver
+	url = https://github.com/SuperDisk/hUGEDriver.git

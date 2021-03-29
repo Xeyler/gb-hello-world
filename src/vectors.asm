@@ -1,6 +1,6 @@
 INCLUDE "hardware.inc"
 
-SECTION "header", ROM0[$100]
+SECTION "header and entrypoint", ROM0[$100]
 
 	; 4 byte entry point
 	nop
