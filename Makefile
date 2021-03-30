@@ -34,7 +34,7 @@ RGBFIX  := $(RGBDS)rgbfix
 ROM = $(BINDIR)/$(ROMNAME).$(ROMEXT)
 
 # Argument constants
-INCDIRS  = $(SRCDIR)/ $(SRCDIR)/include/
+INCDIRS  = $(SRCDIR)/ $(SRCDIR)/include/ $(SRCDIR)/res/music/hUGEDriver/
 WARNINGS = all extra
 ASFLAGS  = -p $(PADVALUE) $(addprefix -i,$(INCDIRS)) $(addprefix -W,$(WARNINGS))
 LDFLAGS  = -p $(PADVALUE)
@@ -42,6 +42,7 @@ FIXFLAGS = -p $(PADVALUE) -v -i "$(GAMEID)" -k "$(LICENSEE)" -l $(OLDLIC) -m $(M
 
 # The list of "root" ASM files that RGBASM will be invoked on
 SRCS = $(wildcard $(SRCDIR)/*.asm)
+SRCS += $(wildcard $(SRCDIR)/res/music/songs/*.asm)
 
 ## Project-specific configuration
 # Use this to override the above
@@ -82,7 +83,9 @@ rebuild:
 $(BINDIR)/%.$(ROMEXT) $(BINDIR)/%.sym $(BINDIR)/%.map: $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(SRCS))
 	@$(MKDIR_P) $(@D)
 	$(RGBASM) $(ASFLAGS) -o $(OBJDIR)/build_date.o $(SRCDIR)/res/build_date.asm
-	$(RGBLINK) $(LDFLAGS) -m $(BINDIR)/$*.map -n $(BINDIR)/$*.sym -o $(BINDIR)/$*.$(ROMEXT) $^ $(OBJDIR)/build_date.o \
+	$(RGBASM) $(ASFLAGS) -o $(OBJDIR)/hUGEDriver.o $(SRCDIR)/res/music/hUGEDriver/hUGEDriver.asm
+	$(RGBASM) $(ASFLAGS) -i$(SRCDIR)/res/music/ -o $(OBJDIR)/song_table.o $(SRCDIR)/res/music/song_table.asm
+	$(RGBLINK) $(LDFLAGS) -m $(BINDIR)/$*.map -n $(BINDIR)/$*.sym -o $(BINDIR)/$*.$(ROMEXT) $^ $(OBJDIR)/build_date.o $(OBJDIR)/hUGEDriver.o $(OBJDIR)/song_table.o \
 	&& $(RGBFIX) -v $(FIXFLAGS) $(BINDIR)/$*.$(ROMEXT)
 
 # `.mk` files are auto-generated dependency lists of the "root" ASM files, to save a lot of hassle.
