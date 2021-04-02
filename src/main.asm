@@ -12,6 +12,9 @@ init:
 ; Call all necessary initialization functions
 	copy_oam_dma_routine
 
+	xor	a
+	ld	[w_current_song_bank], a
+
 	ld	a, IEF_VBLANK
 	ld	[rIE], a
 
@@ -25,10 +28,14 @@ init:
 SECTION "main", ROM0
 
 main:
-; Update sound
+; Update music. If `w_current_song_bank` points to bank 0, then we assume that
+; no song has been selected and therefore, _hUGE_dosound is unsafe.
 	ld	a, [w_current_song_bank]
+	and	a
+	jr	z, .skip_music
 	set_rom_bank_from_a
 	call	_hUGE_dosound
+.skip_music:
 
 ; Get input state
 	; hold last input state in register c
@@ -69,6 +76,17 @@ update_song:
 	ret
 
 init_song:
+	; zero out each channel
+	xor	a
+	ld	[rAUDENA], a
+
+	ld	a, AUDENA_ON
+	ld	[rAUDENA], a
+	ld	a, $FF
+	ld	[rAUDTERM], a
+	ld	a, $77
+	ld	[rAUDVOL], a
+
 	set_rom_bank BANK(song_table)
 	ld	a, [hli]
 	ld	[w_current_song_bank], a
