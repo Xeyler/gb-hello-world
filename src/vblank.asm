@@ -24,13 +24,6 @@ vblank_handler:
 	jp	z, .lag_frame
 
 	; TODO: Implement vblank handler
-	call	rand
-.rand_wait
-	dec	a
-	inc	a
-	dec	a
-	jr	nz, .rand_wait
-
 	pop	af
 .lag_frame
 	pop	af
