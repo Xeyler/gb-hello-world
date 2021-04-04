@@ -46,8 +46,9 @@ SRCS = $(wildcard $(SRCDIR)/*.asm)
 SRCS += $(SRCDIR)/res/build_date.asm
 
 SRCS += $(wildcard $(SRCDIR)/res/music/songs/*.asm)
-SRCS += $(SRCDIR)/res/music/hUGEDriver/hUGEDriver.asm
-SRCS += $(SRCDIR)/res/music/song_table.asm
+
+TILEDATADIR = $(RESDIR)/visual/tile-data
+VWFONTDIR = $(RESDIR)/visual/variable-width-font
 
 ## Project-specific configuration
 # Use this to override the above
@@ -108,17 +109,50 @@ endif
 #                                              #
 ################################################
 
-
-# By default, asset recipes convert files in `res/` into other files in `res/`
-# This line causes assets not found in `res/` to be also looked for in `src/res/`
-# "Source" assets can thus be safely stored there without `make clean` removing them
 VPATH := $(SRCDIR)
 
-# Define how to compress files using the PackBits16 codec
-# Compressor script requires Python 3
-$(RESDIR)/%.pb16: $(SRCDIR)/tools/pb16.py $(RESDIR)/%
+# Tile compilation
+
+MAPSDIR := $(TILEDATADIR)/tilemaps
+METASETSDIR := $(TILEDATADIR)/metatilesets
+SETSDIR := $(TILEDATADIR)/tilesets
+
+MAPS := $(patsubst %.tmx,%.asm,$(wildcard $(MAPSDIR)/*.tmx))
+METASETS := $(patsubst %.tmx,%.asm,$(wildcard $(METASETSDIR)/*.tmx))
+SETS := $(patsubst %.png,%.bin,$(wildcard $(SETSDIR)/*.png))
+TILES_CC := $(SRCDIR)/tools/compile_tiles_res.py
+
+$(MAPSDIR)/%.asm: $(TILES_CC) $(MAPSDIR)/%.csv
 	@$(MKDIR_P) $(@D)
-	$^ $@
+	$^ --tilemap > $@
+
+$(METASETSDIR)/%.asm: $(TILES_CC) $(METASETSDIR)/%.csv
+	@$(MKDIR_P) $(@D)
+	$^ --metatileset > $@
+
+$(TILEDATADIR)/%.csv: $(SRCDIR)/$(TILEDATADIR)/%.tmx
+	@$(MKDIR_P) $(@D)
+	tiled --export-map $< $@
+
+$(SETSDIR)/%.bin: $(SRCDIR)/$(SETSDIR)/%.png
+	@$(MKDIR_P) $(@D)
+	rgbgfx --output $@ $<
+
+# Font compilation
+
+CHARDIR := $(VWFONTDIR)/chars
+FONT_FILE := $(SRCDIR)/$(VWFONTDIR)/font.aseprite
+
+ASEPRITE := aseprite
+
+CHARS := $(addprefix $(CHARDIR)/,$(shell $(ASEPRITE) -b --list-slices $(FONT_FILE)))
+CHARFILES := $(addsuffix .png,$(CHARS))
+
+$(VWFONTDIR)/font.asm: $(SRCDIR)/tools/compile_font.py $(CHARFILES)
+	$^ > $@
+
+$(CHARFILES): $(FONT_FILE)
+	$(ASEPRITE) -b $< --save-as $(CHARDIR)/{slice}.png
 
 # Catch non-existent files
 # KEEP THIS LAST!!

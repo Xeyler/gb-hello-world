@@ -33,7 +33,7 @@ def main(char_image_paths):
             for x in range(width):
                 if pixels[x, y] > 0:
                     row_byte |= (1<<(7-x))
-            print(f"    db  b{row_byte:08b}")
+            print(f"\tdb\t%{row_byte:08b}")
 
 if __name__ == '__main__':
     main(sys.argv[1:])

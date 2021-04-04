@@ -3,6 +3,15 @@ INCLUDE "hardware.inc"
 INCLUDE "main.inc"
 INCLUDE "vblank.inc"
 
+INCLUDE "res/music/hUGEDriver/hUGEDriver.asm"
+INCLUDE "res/music/song_table.asm"
+
+INCLUDE "res/visual/tile-data/tilemaps/map.asm"
+INCLUDE "res/visual/tile-data/metatilesets/metatiles.asm"
+INCBIN "res/visual/tile-data/tilesets/test.bin"
+
+INCLUDE "res/visual/variable-width-font/font.asm"
+
 SECTION "init", ROM0
 
 init:
@@ -12,9 +21,11 @@ init:
 ; Call all necessary initialization functions
 	copy_oam_dma_routine
 
+; Zero out variables
 	xor	a
 	ld	[w_current_song_bank], a
 
+; Set up interrupts
 	ld	a, IEF_VBLANK
 	ld	[rIE], a
 
@@ -23,6 +34,7 @@ init:
 
 	ei
 
+; Enter main loop
 	jp	main
 
 SECTION "main", ROM0
@@ -52,8 +64,8 @@ main:
 	and	b
 	ld	[w_input_pressed], a
 
-; TODO: Logic and scripting
-	call	update_song
+.tick_event:
+	
 
 ; Wait for vblank to update screen and repeat
 	ld	a, VBLANK_FLAG_NOP
@@ -62,20 +74,12 @@ main:
 
 	jp	main
 
-update_song:
-	bit	4, a
-	jp	z, .skip_uwu
-	ld	hl, song_table.uwu
-	jp	init_song
-.skip_uwu
-	bit	5, a
-	jp	z, .skip_ryukenden
-	ld	hl, song_table.ryukenden
-	jp	init_song
-.skip_ryukenden
-	ret
-
-init_song:
+; HL = pointer to song 'struct' containing a u8 bank number and a pointer to
+; the song data. See `res/music/song_table.asm`
+;; Ex:
+;	ld	hl, song_table.{song_name}
+;	jp	play_song
+play_song:
 	; zero out each channel
 	xor	a
 	ld	[rAUDENA], a
