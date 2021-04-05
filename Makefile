@@ -47,7 +47,7 @@ SRCS += $(SRCDIR)/res/build_date.asm
 
 SRCS += $(wildcard $(SRCDIR)/res/music/songs/*.asm)
 
-TILEDATADIR = $(RESDIR)/visual/tile-data
+TILEDATADIR = $(RESDIR)/scenes
 VWFONTDIR = $(RESDIR)/visual/variable-width-font
 
 ## Project-specific configuration

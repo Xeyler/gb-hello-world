@@ -6,9 +6,9 @@ INCLUDE "vblank.inc"
 INCLUDE "res/music/hUGEDriver/hUGEDriver.asm"
 INCLUDE "res/music/song_table.asm"
 
-INCLUDE "res/visual/tile-data/tilemaps/map.asm"
-INCLUDE "res/visual/tile-data/metatilesets/metatiles.asm"
-INCBIN "res/visual/tile-data/tilesets/test.bin"
+INCLUDE "res/scenes/tilemaps/map.asm"
+INCLUDE "res/scenes/metatilesets/metatiles.asm"
+INCBIN "res/scenes/tilesets/test.bin"
 
 INCLUDE "res/visual/variable-width-font/font.asm"
 

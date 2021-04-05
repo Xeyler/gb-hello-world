@@ -9,15 +9,18 @@ def main(res_filename, filetype):
     print(f'SECTION "{name}", ROMX')
     print(f'{name}::')
 
+    csv_file = open(res_filename, 'r')
+    csv_reader = csv.reader(csv_file)
+    csv_data = list(csv_reader)
     if filetype == "--tilemap":
-        csv_file = open(res_filename, 'r')
-        for line in csv_file:
-            print(f"\tdb\t{line}", end='')
+        print(f".width::")
+        print(f"\tdb\t{len(csv_data[0])}")  
+        print(f".data::")
+        for line in csv_data:
+            print(f"\tdb\t", end='')
+            print(", ".join(line))
         csv_file.close()
     elif filetype == "--metatileset":
-        csv_file = open(res_filename, 'r')
-        csv_reader = csv.reader(csv_file)
-        csv_data = list(csv_reader)
         # For metatiles, we want to rearrange it so the bottom half of a
         # metatile is next to the top half
         while len(csv_data) > 0:
