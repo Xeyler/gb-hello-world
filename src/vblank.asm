@@ -23,7 +23,23 @@ vblank_handler:
 	and	a
 	jp	z, .lag_frame
 
-	; TODO: Implement vblank handler
+	ldh	a, [h_lcdc]
+	ld	[rLCDC], a
+	ldh	a, [h_scy]
+	ld	[rSCY], a
+	ldh	a, [h_scx]
+	ld	[rSCX], a
+	ld	a, [h_bgp]
+	ldh	[rBGP], a
+	ld	a, [h_obp0]
+	ldh	[rOBP0], a
+	ld	a, [h_obp1]
+	ldh	[rOBP1], a
+
+	ldh	a, [h_vblank_flag]	
+
+	; TODO: Process according to vblank flag
+
 	pop	af
 .lag_frame
 	pop	af

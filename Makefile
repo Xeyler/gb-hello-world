@@ -40,15 +40,15 @@ ASFLAGS  = -p $(PADVALUE) $(addprefix -i,$(INCDIRS)) $(addprefix -W,$(WARNINGS))
 LDFLAGS  = -p $(PADVALUE)
 FIXFLAGS = -p $(PADVALUE) -v -i "$(GAMEID)" -k "$(LICENSEE)" -l $(OLDLIC) -m $(MBC) -n $(VERSION) -r $(SRAMSIZE) -t $(TITLE)
 
+TILEDATADIR = $(RESDIR)/scenes
+VWFONTDIR = $(RESDIR)/visual/variable-width-font
+
 # The list of "root" ASM files that RGBASM will be invoked on
 SRCS = $(wildcard $(SRCDIR)/*.asm)
 
 SRCS += $(SRCDIR)/res/build_date.asm
 
 SRCS += $(wildcard $(SRCDIR)/res/music/songs/*.asm)
-
-TILEDATADIR = $(RESDIR)/scenes
-VWFONTDIR = $(RESDIR)/visual/variable-width-font
 
 ## Project-specific configuration
 # Use this to override the above
@@ -117,9 +117,6 @@ MAPSDIR := $(TILEDATADIR)/tilemaps
 METASETSDIR := $(TILEDATADIR)/metatilesets
 SETSDIR := $(TILEDATADIR)/tilesets
 
-MAPS := $(patsubst %.tmx,%.asm,$(wildcard $(MAPSDIR)/*.tmx))
-METASETS := $(patsubst %.tmx,%.asm,$(wildcard $(METASETSDIR)/*.tmx))
-SETS := $(patsubst %.png,%.bin,$(wildcard $(SETSDIR)/*.png))
 TILES_CC := $(SRCDIR)/tools/compile_tiles_res.py
 
 $(MAPSDIR)/%.asm: $(TILES_CC) $(MAPSDIR)/%.csv
@@ -133,6 +130,9 @@ $(METASETSDIR)/%.asm: $(TILES_CC) $(METASETSDIR)/%.csv
 $(TILEDATADIR)/%.csv: $(SRCDIR)/$(TILEDATADIR)/%.tmx
 	@$(MKDIR_P) $(@D)
 	tiled --export-map $< $@
+
+$(SETSDIR)/%.asm: $(TILES_CC) $(SETSDIR)/%.bin
+	$^ --tileset > $@
 
 $(SETSDIR)/%.bin: $(SRCDIR)/$(SETSDIR)/%.png
 	@$(MKDIR_P) $(@D)

@@ -6,11 +6,15 @@ INCLUDE "vblank.inc"
 INCLUDE "res/music/hUGEDriver/hUGEDriver.asm"
 INCLUDE "res/music/song_table.asm"
 
-INCLUDE "res/scenes/tilemaps/map.asm"
-INCLUDE "res/scenes/metatilesets/metatiles.asm"
-INCBIN "res/scenes/tilesets/test.bin"
+INCLUDE "res/events/main.asm"
 
-INCLUDE "res/visual/variable-width-font/font.asm"
+INCLUDE "state_handlers/cutscene.asm"
+INCLUDE "state_handlers/dialogue.asm"
+INCLUDE "state_handlers/loading_data.asm"
+INCLUDE "state_handlers/loading_scene.asm"
+INCLUDE "state_handlers/menu.asm"
+INCLUDE "state_handlers/playing.asm"
+INCLUDE "state_handlers/saving_data.asm"
 
 SECTION "init", ROM0
 
@@ -18,12 +22,21 @@ init:
 	di
 	ld	sp, w_stack_bottom
 
-; Call all necessary initialization functions
+; Call all necessary initialization macros
 	copy_oam_dma_routine
+	init_vblank_shadow_registers
 
 ; Zero out variables
 	xor	a
 	ld	[w_current_song_bank], a
+
+; Initialize variables
+	; initialize state machine
+	ld	hl, main_event
+	ld	a, h
+	ld	[h_event_index + 1], a
+	ld	a, l
+	ld	[h_event_index], a
 
 ; Set up interrupts
 	ld	a, IEF_VBLANK
@@ -65,14 +78,52 @@ main:
 	ld	[w_input_pressed], a
 
 .tick_event:
-	
+	ld	hl, h_event_index
+	dereference_hl_into_hl
+	ld	c, [hl]
+	inc	hl
+	ld	b, 0
+	ld	a, h
+	ld	[h_event_index + 1], a
+	ld	a, l
+	ld	[h_event_index], a
+	ld	hl, state_jump_table
+	add	hl, bc
+	dereference_hl_into_hl
+	jp	hl
 
-; Wait for vblank to update screen and repeat
-	ld	a, VBLANK_FLAG_NOP
-	ld	[h_vblank_flag], a
-	call	wait_for_vblank
+SECTION "stack", WRAM0[STACK_LOCATION - STACK_SIZE]
 
-	jp	main
+	ds	STACK_SIZE
+w_stack_bottom:
+
+SECTION "main variables", WRAM0
+
+w_input_held: db
+w_input_pressed: db
+
+w_current_song_bank: db
+
+SECTION "main hram variables", HRAM
+
+h_event_index: dw
+
+SECTION "state jump table", ROM0
+state_jump_table:
+.state_playing::
+	dw	state_playing
+.state_loading_scene::
+	dw	state_loading_scene
+.state_dialogue::
+	dw	state_dialogue
+.state_menu::
+	dw	state_menu
+.state_cutscene::
+	dw	state_cutscene
+.state_saving_data::
+	dw	state_saving_data
+.state_loading_data::
+	dw	state_loading_data
 
 ; HL = pointer to song 'struct' containing a u8 bank number and a pointer to
 ; the song data. See `res/music/song_table.asm`
@@ -102,14 +153,3 @@ play_song:
 
 	ret
 
-SECTION "stack", WRAM0[STACK_LOCATION - STACK_SIZE]
-
-	ds	STACK_SIZE
-w_stack_bottom:
-
-SECTION "main variables", WRAM0
-
-w_input_held: db
-w_input_pressed: db
-
-w_current_song_bank: db
