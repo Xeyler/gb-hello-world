@@ -15,6 +15,7 @@ state_loading_scene:
 	dereference_hl_into_hl
 	ld	a, [hli]
 	set_rom_bank_from_a
+	ld	[h_scene_bank], a
 	ld	a, [hli]
 	ld	e, a
 	ld	a, [hli]
@@ -40,12 +41,16 @@ state_loading_scene:
 
 	call	memcpy
 
-; TODO: Copy map via metatileset
+; Copy map via metatileset
 	ld	hl, 4 * 64
 	add	hl, de
 	push	de
 	ld	d, h
+	ld	a, h
+	ld	[h_scene_map + 1], a
 	ld	e, l
+	ld	a, l
+	ld	[h_scene_map], a
 	pop	hl
 	ld	bc, $9800
 	; de contains location of tilemap
@@ -79,6 +84,19 @@ state_loading_scene:
 	ld	a, b
 	cp	a, $9C
 	jr	c, .repeat_metatile_copy
+
+; Set player location
+	ld	hl, h_event_index
+	dereference_hl_into_hl
+	ld	a, [hli]
+	ld	[h_player_y], a
+	ld	a, [hli]
+	ld	[h_player_x], a
+	
+	ld	a, h
+	ld	[h_event_index + 1], a
+	ld	a, l
+	ld	[h_event_index], a
 
 ; Re-enable screen
 	ld	a, [h_lcdc]
@@ -119,3 +137,6 @@ copy_metatile:
 	ld	[bc], a
 	ret
 
+SECTION "scene hram variables", HRAM
+h_scene_bank: db
+h_scene_map: dw

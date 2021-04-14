@@ -16,6 +16,8 @@ INCLUDE "state_handlers/menu.asm"
 INCLUDE "state_handlers/playing.asm"
 INCLUDE "state_handlers/saving_data.asm"
 
+INCLUDE "res/visual/sprites/sprite_table.asm"
+
 SECTION "init", ROM0
 
 init:
@@ -48,9 +50,40 @@ init:
 	ei
 
 ; Enter main loop
-	jp	main
+	jp	before_main
 
 SECTION "main", ROM0
+
+before_main:
+	ld	a, [h_lcdc]
+	res	7, a
+	ld	[h_lcdc], a
+	ld	a, VBLANK_FLAG_UPDATE_VARS
+	ld	[h_vblank_flag], a
+
+	call	wait_for_vblank
+
+	init_sprites
+
+	ld	a, $80
+	ld	hl, w_shadow_oam + 2
+	ld	[hli], a
+	xor	a
+	ld	[hl], a
+	ld	a, $82
+	ld	hl, w_shadow_oam + 6
+	ld	[hli], a
+	xor	a
+	ld	[hl], a
+
+	move_objects_off_screen
+
+	call	init_dialogue
+
+	ld	a, [h_lcdc]
+	set	7, a
+	ld	[h_lcdc], a
+	ld	[rLCDC], a
 
 main:
 ; Update music. If `w_current_song_bank` points to bank 0, then we assume that
@@ -62,27 +95,12 @@ main:
 	call	_hUGE_dosound
 .skip_music:
 
-; Get input state
-	; hold last input state in register c
-	ld	a, [w_input_held]
-	ld	c, a
-
-	; save new input state to ram
-	call	get_input
-	ld	[w_input_held], a
-
-	; compute and save newly pressed buttons
-	ld	b, a
-	xor	c
-	and	b
-	ld	[w_input_pressed], a
-
 .tick_event:
 	ld	hl, h_event_index
 	dereference_hl_into_hl
+	ld	b, 0
 	ld	c, [hl]
 	inc	hl
-	ld	b, 0
 	ld	a, h
 	ld	[h_event_index + 1], a
 	ld	a, l

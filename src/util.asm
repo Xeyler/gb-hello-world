@@ -18,7 +18,7 @@ get_input:
 	ld	hl, rP1
 	ld	a, P1F_GET_BTN
 	ld	[hl], a
-REPT 4
+REPT 8
 	ld	a, [hl]
 ENDR
 
@@ -28,7 +28,7 @@ ENDR
 
 	ld	a, P1F_GET_DPAD
 	ld	[hl], a
-REPT 4
+REPT 8
 	ld	a, [hl]
 ENDR
 

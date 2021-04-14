@@ -16,4 +16,12 @@ STATE_LOADING_DATA	EQU 12
 
 EXPORT	init
 
+init_sprites: MACRO
+	set_rom_bank(BANK(sprite_table))
+	ld	hl, $8800
+	ld	de, sprite_table
+	ld	bc, sprite_table.end - sprite_table
+	call	memcpy
+ENDM
+
 ENDC	; __MAIN_INC

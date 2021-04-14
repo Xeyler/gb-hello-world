@@ -19,10 +19,6 @@ wait_for_vblank:
 vblank_handler:
 	push	af
 
-	ldh	a, [h_vblank_enable]
-	and	a
-	jp	z, .lag_frame
-
 	ldh	a, [h_lcdc]
 	ld	[rLCDC], a
 	ldh	a, [h_scy]
@@ -36,9 +32,45 @@ vblank_handler:
 	ld	a, [h_obp1]
 	ldh	[rOBP1], a
 
+	ldh	a, [h_vblank_enable]
+	and	a
+	jp	z, .lag_frame
+	
+	xor	a
+	ldh	[h_vblank_enable], a
+
 	ldh	a, [h_vblank_flag]	
 
-	; TODO: Process according to vblank flag
+	bit	0, a
+	jr	z, .skip_oam_dma
+
+	ld	a, HIGH(w_shadow_oam)
+	call	h_oam_dma
+
+	ld	a, [h_vblank_flag]
+
+.skip_oam_dma:
+
+	bit	1, a
+	jr	z, .skip_memcpy
+
+; TODO: memcpy
+
+	ld	a, [h_vblank_flag]
+
+.skip_memcpy:
+
+	bit	2, a
+	jr	z, .skip_call
+
+	ld	hl, .after_call
+	push	hl
+	ld	hl, sp + 8
+	dereference_hl_into_hl
+	jp	hl
+.after_call:
+
+.skip_call:
 
 	pop	af
 .lag_frame

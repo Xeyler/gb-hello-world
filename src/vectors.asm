@@ -14,7 +14,7 @@ SECTION "vblank interrupt", ROM0[$40]
 	jp	vblank_handler
 
 SECTION "stat interrupt", ROM0[$48]
-	reti
+	jp	dialogue_stat_handler
 
 SECTION "timer interrupt", ROM0[$50]
 	reti

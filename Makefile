@@ -49,6 +49,7 @@ SRCS = $(wildcard $(SRCDIR)/*.asm)
 SRCS += $(SRCDIR)/res/build_date.asm
 
 SRCS += $(wildcard $(SRCDIR)/res/music/songs/*.asm)
+SRCS += $(wildcard $(SRCDIR)/res/scenes/*.asm)
 
 ## Project-specific configuration
 # Use this to override the above
@@ -153,6 +154,11 @@ $(VWFONTDIR)/font.asm: $(SRCDIR)/tools/compile_font.py $(CHARFILES)
 
 $(CHARFILES): $(FONT_FILE)
 	$(ASEPRITE) -b $< --save-as $(CHARDIR)/{slice}.png
+
+# Compile any image to a binary via rgbgfx
+$(RESDIR)/%.bin: $(RESDIR)/%.png
+	@$(MKDIR_P) $(@D)
+	rgbgfx -h --output $@ $<
 
 # Catch non-existent files
 # KEEP THIS LAST!!
